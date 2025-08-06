@@ -24,11 +24,11 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
                     "Destino B": origem_a
                 }
 
-                # Aplica filtro se origem e destino do usuário foram informados
+                # Filtro se usuário especificou origem/destino
                 if origem_user and destino_user:
                     if not (
-                        (origem_a == origem_user and origem_b == destino_user) or
-                        (origem_b == origem_user and origem_a == destino_user)
+                        (origem_a == origem_user and casal["Destino A"] == destino_user) or
+                        (origem_b == origem_user and casal["Destino B"] == destino_user)
                     ):
                         continue
 
@@ -71,21 +71,23 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                     triangulo = {
                         "Juiz A": linha_a["Nome"],
                         "Origem A": origem_a,
-                        "Destino A": origem_b,
+                        "A ➝": origem_b,
+
                         "Juiz B": linha_b["Nome"],
                         "Origem B": origem_b,
-                        "Destino B": origem_c,
+                        "B ➝": origem_c,
+
                         "Juiz C": linha_c["Nome"],
                         "Origem C": origem_c,
-                        "Destino C": origem_a
+                        "C ➝": origem_a
                     }
 
-                    # Aplica filtro se origem/destino do usuário foram informados
+                    # Filtro se usuário especificou origem/destino
                     if origem_user and destino_user:
                         if not (
-                            (origem_a == origem_user and origem_b == destino_user) or
-                            (origem_b == origem_user and origem_c == destino_user) or
-                            (origem_c == origem_user and origem_a == destino_user)
+                            (origem_a == origem_user and triangulo["A ➝"] == destino_user) or
+                            (origem_b == origem_user and triangulo["B ➝"] == destino_user) or
+                            (origem_c == origem_user and triangulo["C ➝"] == destino_user)
                         ):
                             continue
 
