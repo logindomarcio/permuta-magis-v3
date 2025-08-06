@@ -3,6 +3,7 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
 
     for i, linha_a in df.iterrows():
         origem_a = linha_a["Origem"]
+        entrancia_a = linha_a.get("Entrância", None)
         destinos_a = [linha_a["Destino 1"], linha_a["Destino 2"], linha_a["Destino 3"]]
         destinos_a = [d for d in destinos_a if d is not None]
 
@@ -11,15 +12,19 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
                 continue  # ignora comparação com ele mesmo
 
             origem_b = linha_b["Origem"]
+            entrancia_b = linha_b.get("Entrância", None)
             destinos_b = [linha_b["Destino 1"], linha_b["Destino 2"], linha_b["Destino 3"]]
             destinos_b = [d for d in destinos_b if d is not None]
 
             if origem_b in destinos_a and origem_a in destinos_b:
                 casal = {
                     "Juiz A": linha_a["Nome"],
+                    "Entrância A": entrancia_a,
                     "Origem A": origem_a,
                     "Destino A": origem_b,
+
                     "Juiz B": linha_b["Nome"],
+                    "Entrância B": entrancia_b,
                     "Origem B": origem_b,
                     "Destino B": origem_a
                 }
@@ -42,6 +47,7 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
 
     for i, linha_a in df.iterrows():
         origem_a = linha_a["Origem"]
+        entrancia_a = linha_a.get("Entrância", None)
         destinos_a = [linha_a["Destino 1"], linha_a["Destino 2"], linha_a["Destino 3"]]
         destinos_a = [d for d in destinos_a if d is not None]
 
@@ -50,6 +56,7 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                 continue
 
             origem_b = linha_b["Origem"]
+            entrancia_b = linha_b.get("Entrância", None)
             destinos_b = [linha_b["Destino 1"], linha_b["Destino 2"], linha_b["Destino 3"]]
             destinos_b = [d for d in destinos_b if d is not None]
 
@@ -61,6 +68,7 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                     continue
 
                 origem_c = linha_c["Origem"]
+                entrancia_c = linha_c.get("Entrância", None)
                 destinos_c = [linha_c["Destino 1"], linha_c["Destino 2"], linha_c["Destino 3"]]
                 destinos_c = [d for d in destinos_c if d is not None]
 
@@ -70,14 +78,17 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                 if origem_a in destinos_c:  # C quer ir para A
                     triangulo = {
                         "Juiz A": linha_a["Nome"],
+                        "Entrância A": entrancia_a,
                         "Origem A": origem_a,
                         "A ➝": origem_b,
 
                         "Juiz B": linha_b["Nome"],
+                        "Entrância B": entrancia_b,
                         "Origem B": origem_b,
                         "B ➝": origem_c,
 
                         "Juiz C": linha_c["Nome"],
+                        "Entrância C": entrancia_c,
                         "Origem C": origem_c,
                         "C ➝": origem_a
                     }
