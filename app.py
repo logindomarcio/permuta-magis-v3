@@ -5,6 +5,16 @@ from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 
 # ===============================
+# Lista fixa de todos os TJs do Brasil (ordem alfabética)
+# ===============================
+LISTA_TJ = sorted([
+    "TJAC", "TJAL", "TJAM", "TJAP", "TJBA", "TJCE", "TJDFT", "TJES",
+    "TJGO", "TJMA", "TJMG", "TJMS", "TJMT", "TJPA", "TJPB", "TJPE",
+    "TJPI", "TJPR", "TJRJ", "TJRN", "TJRO", "TJRR", "TJRS", "TJSC",
+    "TJSE", "TJSP", "TJTO"
+])
+
+# ===============================
 # Função para carregar dados via st.secrets
 # ===============================
 @st.cache_data
@@ -21,7 +31,6 @@ def carregar_dados():
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
     return df
-
 
 # ===============================
 # Interface
@@ -52,19 +61,14 @@ if st.button("🔄 Atualizar dados da planilha"):
 df = carregar_dados()
 
 # ===============================
-# Seleção de origem e destino
+# Seleção de origem e destino (fixos)
 # ===============================
 st.markdown("<h3 style='color: #34495e;'>🔍 Escolha seus critérios</h3>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
-    origem_user = st.selectbox("📍 Sua Origem", sorted(df["Origem"].dropna().unique()))
+    origem_user = st.selectbox("📍 Sua Origem", LISTA_TJ)
 with col2:
-    destino_user = st.selectbox(
-        "🎯 Seu Destino Preferencial",
-        sorted(set(df["Destino 1"].dropna()) |
-               set(df["Destino 2"].dropna()) |
-               set(df["Destino 3"].dropna()))
-    )
+    destino_user = st.selectbox("🎯 Seu Destino Preferencial", LISTA_TJ)
 
 # ===============================
 # 🔎 Consulta personalizada
@@ -78,7 +82,7 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
             f"<h4 style='color: #16a085;'>🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s)</h4>",
             unsafe_allow_html=True
         )
-        st.info(f"Foi encontrada uma possibilidade de troca direta entre juízes que ligam **{origem_user} ↔ {destino_user}**.")
+        st.info(f"Troca direta entre juízes que ligam **{origem_user} ↔ {destino_user}**.")
 
         casais_df = pd.DataFrame(casais_filtrados)
         st.dataframe(casais_df, use_container_width=True)
@@ -96,7 +100,7 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
             f"<h4 style='color: #c0392b;'>🔺 {len(triangulos_filtrados)} triangulação(ões) possível(is)</h4>",
             unsafe_allow_html=True
         )
-        st.info("Abaixo, cada triangulação mostra a Origem atual e o Destino desejado de cada juiz participante.")
+        st.info("Cada triangulação mostra a Origem atual e o Destino desejado de cada juiz.")
 
         for idx, triang in enumerate(triangulos_filtrados, 1):
             st.markdown(f"**Triangulação {idx}:**")
