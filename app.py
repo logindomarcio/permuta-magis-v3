@@ -3,6 +3,17 @@ import gspread
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
+import unicodedata
+
+# ===============================
+# Função para normalizar textos (remoção de acentos e caixa baixa)
+# ===============================
+def normalizar_texto(texto):
+    if not isinstance(texto, str):
+        return ""
+    texto_norm = unicodedata.normalize('NFKD', texto)
+    texto_sem_acento = ''.join(c for c in texto_norm if not unicodedata.combining(c))
+    return texto_sem_acento.strip().lower()
 
 # ===============================
 # Função para carregar dados via st.secrets
@@ -107,18 +118,25 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
     casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
     triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
 
-    # Acrescentar coluna Entrância nos resultados
+    # Adicionar entrância aos resultados de casais
     for casal in casais_filtrados:
         juiz_a = casal["Juiz A"]
         juiz_b = casal["Juiz B"]
-        casal["Entrância A"] = df.loc[df["Nome"] == juiz_a, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_a, "Entrância"].empty else None
-        casal["Entrância B"] = df.loc[df["Nome"] == juiz_b, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_b, "Entrância"].empty else None
 
+        linha_a = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_a)]
+        linha_b = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_b)]
+
+        casal["Entrância A"] = linha_a["Entrância"].values[0] if not linha_a.empty else None
+        casal["Entrância B"] = linha_b["Entrância"].values[0] if not linha_b.empty else None
+
+    # Adicionar entrância aos resultados de triangulações
     for triang in triangulos_filtrados:
         for pos in ["A", "B", "C"]:
             juiz_nome = triang[f"Juiz {pos}"]
-            triang[f"Entrância {pos}"] = df.loc[df["Nome"] == juiz_nome, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_nome, "Entrância"].empty else None
+            linha = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_nome)]
+            triang[f"Entrância {pos}"] = linha["Entrância"].values[0] if not linha.empty else None
 
+    # Exibir resultados
     if casais_filtrados:
         st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
         st.dataframe(pd.DataFrame(casais_filtrados))
