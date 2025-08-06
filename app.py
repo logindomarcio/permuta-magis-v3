@@ -1,6 +1,5 @@
 import streamlit as st
 import gspread
-import json
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
@@ -10,10 +9,7 @@ from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 # ===============================
 @st.cache_data
 def carregar_dados():
-    # Lê as credenciais direto do secrets.toml
     creds_dict = st.secrets["google_service_account"]
-
-    # Autenticação com gspread
     gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open("Permuta - Magistratura Estadual").sheet1
     data = sheet.get_all_values()
@@ -53,10 +49,7 @@ df = carregar_dados()
 # ===============================
 # Seleção de origem e destino
 # ===============================
-st.markdown(
-    "<h3 style='color: #34495e;'>🔍 Escolha seus critérios</h3>",
-    unsafe_allow_html=True
-)
+st.markdown("<h3 style='color: #34495e;'>🔍 Escolha seus critérios</h3>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
     origem_user = st.selectbox("📍 Sua Origem", sorted(df["Origem"].dropna().unique()))
@@ -72,26 +65,48 @@ with col2:
 # 🔎 Consulta personalizada
 # ===============================
 if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
-    casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
-    triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
 
+    # -------- Permutas Diretas --------
+    casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
     if casais_filtrados:
-        st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
-        st.dataframe(pd.DataFrame(casais_filtrados))
+        st.markdown(
+            f"<h4 style='color: #16a085;'>🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s)</h4>",
+            unsafe_allow_html=True
+        )
+        st.info(f"Foi encontrada uma possibilidade de troca direta entre juízes que ligam **{origem_user} ↔ {destino_user}**.")
+
+        casais_df = pd.DataFrame(casais_filtrados)
+        st.dataframe(casais_df, use_container_width=True)
+
         st.subheader("🌐 Visualização no Mapa (Casais):")
         fig_casais = mostrar_mapa_casais(casais_filtrados)
         st.plotly_chart(fig_casais, use_container_width=True)
     else:
-        st.info("⚠️ Nenhuma permuta direta encontrada para sua origem e destino.")
+        st.warning("⚠️ Nenhuma permuta direta encontrada para sua origem e destino.")
 
+    # -------- Triangulações --------
+    triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
     if triangulos_filtrados:
-        st.success(f"🔺 {len(triangulos_filtrados)} triangulação(ões) possível(is) para seu caso:")
-        st.dataframe(pd.DataFrame(triangulos_filtrados))
+        st.markdown(
+            f"<h4 style='color: #c0392b;'>🔺 {len(triangulos_filtrados)} triangulação(ões) possível(is)</h4>",
+            unsafe_allow_html=True
+        )
+        st.info("Abaixo, cada triangulação mostra a Origem atual e o Destino desejado de cada juiz participante.")
+
+        for idx, triang in enumerate(triangulos_filtrados, 1):
+            st.markdown(f"**Triangulação {idx}:**")
+            triang_df = pd.DataFrame([
+                {"Posição": "A → B", "Juiz": triang["Juiz A"], "Origem": triang["Origem A"], "Destino": triang["Destino A"]},
+                {"Posição": "B → C", "Juiz": triang["Juiz B"], "Origem": triang["Origem B"], "Destino": triang["Destino B"]},
+                {"Posição": "C → A", "Juiz": triang["Juiz C"], "Origem": triang["Origem C"], "Destino": triang["Destino C"]}
+            ])
+            st.dataframe(triang_df, use_container_width=True)
+
         st.subheader("🌐 Visualização no Mapa (Triangulações):")
         fig_triang = mostrar_mapa_triangulacoes(triangulos_filtrados)
         st.plotly_chart(fig_triang, use_container_width=True)
     else:
-        st.info("⚠️ Nenhuma triangulação encontrada para sua origem e destino.")
+        st.warning("⚠️ Nenhuma triangulação encontrada para sua origem e destino.")
 
 # ===============================
 # Base completa (opcional)
