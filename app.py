@@ -26,6 +26,20 @@ def carregar_dados():
     df["Origem"] = df["Origem"].str.strip()
     return df
 
+# Definir cor de fundo bege claro
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #fdf6e3;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
 # ===============================
 # Interface
 # ===============================
@@ -107,3 +121,18 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
 # ===============================
 with st.expander("📂 Ver base de dados completa"):
     st.dataframe(df)
+
+# ===============================
+# Rodapé com advertências e contato
+# ===============================
+st.markdown(
+    """
+    <hr>
+    <p>⚠️ <b>Aplicação feita de forma colaborativa, gratuita e sem fins econômicos.</b></p>
+    <p>🗂️ <b>Os dados são voluntariamente informados por seus próprios titulares e detentores.</b></p>
+    <p>🔒 <b>A presente aplicação somente é acessada por meio do link pessoal enviado e solicitado pelo interessado.</b></p>
+    <br>
+    <p>💡 <b>Necessita de mentoria em inteligência artificial e aplicação na sua rotina, <a href="mailto:marciocarneirodemesquitajunior@gmail.com">contacte-nos</a>!</b></p>
+    """,
+    unsafe_allow_html=True
+)
