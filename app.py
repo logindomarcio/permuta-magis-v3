@@ -33,16 +33,24 @@ def carregar_dados():
     return df
 
 # ===============================
-# Interface
+# Interface - Título e Subtítulo
 # ===============================
 st.markdown(
     """
-    <h1 style='text-align: center; color: #2c3e50;'>
-    🔄 Permuta entre Juízes – Consulta Personalizada
+    <h1 style='text-align: center; font-family: "Times New Roman", serif; font-size: 42px; color: #2c3e50;'>
+        Permuta - Magistratura Estadual
     </h1>
+    <p style='text-align: center; font-family: "Times New Roman", serif; font-size: 16px; color: #555555; max-width: 900px; margin: auto;'>
+        A presente aplicação tem finalidade meramente ilustrativa, gratuita e não oficial, 
+        e não é vinculada a qualquer Tribunal ou instituição associativa. 
+        Os dados abaixo foram voluntariamente preenchidos por interessados. 
+        Eventuais problemas técnicos são naturais. 
+        O objetivo foi gerar visualização gráfica e rápida dos dados.
+    </p>
     """,
     unsafe_allow_html=True
 )
+
 
 
 # Login simples
