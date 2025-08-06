@@ -43,6 +43,11 @@ if usuarios.get(usuario) != senha:
     st.warning("Acesso restrito. Digite usuário e senha válidos.")
     st.stop()
 
+# Botão para atualizar dados
+if st.button("🔄 Atualizar dados da planilha"):
+    st.cache_data.clear()
+    st.success("✅ Dados atualizados com sucesso!")
+
 # Carregar dados
 df = carregar_dados()
 
