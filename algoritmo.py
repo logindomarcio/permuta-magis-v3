@@ -1,4 +1,4 @@
-def buscar_permutas_diretas(df):
+def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
     casais = []
 
     for i, linha_a in df.iterrows():
@@ -15,18 +15,27 @@ def buscar_permutas_diretas(df):
             destinos_b = [d for d in destinos_b if d is not None]
 
             if origem_b in destinos_a and origem_a in destinos_b:
-                casais.append({
+                casal = {
                     "Juiz A": linha_a["Nome"],
-                    "Origem A": origem_a,
-                    "Destino A": origem_b,
+                    "A ➝": origem_b,
                     "Juiz B": linha_b["Nome"],
-                    "Origem B": origem_b,
-                    "Destino B": origem_a
-                })
+                    "B ➝": origem_a
+                }
+
+                # Se o usuário filtrou por origem/destino, aplica o filtro
+                if origem_user and destino_user:
+                    if not (
+                        (casal["A ➝"] == destino_user and origem_a == origem_user) or
+                        (casal["B ➝"] == destino_user and origem_b == origem_user)
+                    ):
+                        continue
+
+                casais.append(casal)
 
     return casais
 
-def buscar_triangulacoes(df):
+
+def buscar_triangulacoes(df, origem_user=None, destino_user=None):
     triangulos = []
 
     for i, linha_a in df.iterrows():
@@ -57,13 +66,24 @@ def buscar_triangulacoes(df):
                     continue  # B não quer ir para C
 
                 if origem_a in destinos_c:  # C quer ir para A
-                    triangulos.append({
+                    triangulo = {
                         "Juiz A": linha_a["Nome"],
                         "A ➝": origem_b,
                         "Juiz B": linha_b["Nome"],
                         "B ➝": origem_c,
                         "Juiz C": linha_c["Nome"],
                         "C ➝": origem_a
-                    })
+                    }
+
+                    # Aplica filtro se usuário informou origem/destino
+                    if origem_user and destino_user:
+                        if not (
+                            (triangulo["A ➝"] == destino_user and origem_a == origem_user) or
+                            (triangulo["B ➝"] == destino_user and origem_b == origem_user) or
+                            (triangulo["C ➝"] == destino_user and origem_c == origem_user)
+                        ):
+                            continue
+
+                    triangulos.append(triangulo)
 
     return triangulos

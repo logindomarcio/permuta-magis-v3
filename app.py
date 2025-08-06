@@ -63,46 +63,35 @@ with col1:
 with col2:
     destino_user = st.selectbox(
         "🎯 Seu Destino Preferencial",
-        sorted(set(df["Destino 1"].dropna()) | set(df["Destino 2"].dropna()) | set(df["Destino 3"].dropna()))
+        sorted(set(df["Destino 1"].dropna()) |
+               set(df["Destino 2"].dropna()) |
+               set(df["Destino 3"].dropna()))
     )
 
 # ===============================
-# Botão para buscar
+# 🔎 Consulta personalizada
 # ===============================
-if st.button("🔎 Buscar Permutas e Triangulações para meu caso"):
-    # Permutas diretas
-    casais_todos = buscar_permutas_diretas(df)
-    casais_filtrados = [
-        c for c in casais_todos
-        if (c["A"] == origem_user and c["B→"] == destino_user) or
-           (c["B"] == origem_user and c["A→"] == destino_user)
-    ]
+if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
+    casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
+    triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
 
-    triang_todos = buscar_triangulacoes(df)
-    triang_filtrados = [
-        t for t in triang_todos
-        if t["A"] == origem_user and t["C→"] == destino_user
-    ]
-
-    # Resultados permutas diretas
-    st.markdown("<h4 style='color: #27ae60;'>🔁 Permutas Diretas Encontradas</h4>", unsafe_allow_html=True)
     if casais_filtrados:
-        st.success(f"{len(casais_filtrados)} permuta(s) direta(s) encontrada(s).")
+        st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
         st.dataframe(pd.DataFrame(casais_filtrados))
+        st.subheader("🌐 Visualização no Mapa (Casais):")
         fig_casais = mostrar_mapa_casais(casais_filtrados)
         st.plotly_chart(fig_casais, use_container_width=True)
     else:
-        st.info("Nenhuma permuta direta encontrada para sua origem/destino.")
+        st.info("⚠️ Nenhuma permuta direta encontrada para sua origem e destino.")
 
-    # Resultados triangulações
-    st.markdown("<h4 style='color: #2980b9;'>🔺 Triangulações Encontradas</h4>", unsafe_allow_html=True)
-    if triang_filtrados:
-        st.success(f"{len(triang_filtrados)} triangulação(ões) encontrada(s).")
-        st.dataframe(pd.DataFrame(triang_filtrados))
-        fig_triang = mostrar_mapa_triangulacoes(triang_filtrados)
+    if triangulos_filtrados:
+        st.success(f"🔺 {len(triangulos_filtrados)} triangulação(ões) possível(is) para seu caso:")
+        st.dataframe(pd.DataFrame(triangulos_filtrados))
+        st.subheader("🌐 Visualização no Mapa (Triangulações):")
+        fig_triang = mostrar_mapa_triangulacoes(triangulos_filtrados)
         st.plotly_chart(fig_triang, use_container_width=True)
     else:
-        st.info("Nenhuma triangulação encontrada para sua origem/destino.")
+        st.info("⚠️ Nenhuma triangulação encontrada para sua origem e destino.")
 
 # ===============================
 # Base completa (opcional)
