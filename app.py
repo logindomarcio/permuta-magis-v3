@@ -26,7 +26,9 @@ def carregar_dados():
     df["Origem"] = df["Origem"].str.strip()
     return df
 
-# Definir cor de fundo bege claro
+# ===============================
+# Estilo - cor de fundo bege claro
+# ===============================
 st.markdown(
     """
     <style>
@@ -38,10 +40,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-
 # ===============================
-# Interface
+# Interface - Título e descrição
 # ===============================
 st.markdown(
     """
@@ -57,7 +57,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ===============================
+# Botão para atualizar dados manualmente
+# ===============================
+if st.button("🔄 Atualizar base de dados agora"):
+    st.cache_data.clear()
+    st.success("✅ Base de dados atualizada! Clique novamente em 'Buscar' para ver os dados mais recentes.")
+
+# ===============================
 # Carregar dados
+# ===============================
 df = carregar_dados()
 
 # Lista de e-mails autorizados
