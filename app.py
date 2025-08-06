@@ -9,19 +9,17 @@ from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 # ===============================
 @st.cache_data
 def carregar_dados():
-    # Lê as credenciais direto do secrets.toml
     creds_dict = st.secrets["google_service_account"]
-
-    # Autenticação com gspread
     gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open("Permuta - Magistratura Estadual").sheet1
     data = sheet.get_all_values()
     df = pd.DataFrame(data[1:], columns=data[0])
 
     # Limpar espaços e valores vazios
-    for coluna in ["Destino 1", "Destino 2", "Destino 3", "E-mail"]:
+    for coluna in ["Destino 1", "Destino 2", "Destino 3", "E-mail", "Entrância"]:
         if coluna in df.columns:
             df[coluna] = df[coluna].apply(lambda x: x.strip() if x and x.strip() != "" else None)
+
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
     return df
@@ -32,9 +30,7 @@ def carregar_dados():
 st.markdown(
     """
     <style>
-    body {
-        background-color: #fdf6e3;
-    }
+    body { background-color: #fdf6e3; }
     </style>
     """,
     unsafe_allow_html=True
@@ -82,7 +78,7 @@ if email_user not in emails_autorizados:
     st.stop()
 
 # ===============================
-# Lista fixa de todos os TJs do Brasil (ordem alfabética)
+# Lista fixa de todos os TJs do Brasil
 # ===============================
 lista_tjs = sorted([
     "TJAC", "TJAL", "TJAM", "TJAP", "TJBA", "TJCE", "TJDFT", "TJES", "TJGO", "TJMA",
@@ -106,6 +102,18 @@ with col2:
 if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
     casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
     triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
+
+    # Acrescentar coluna Entrância nos resultados
+    for casal in casais_filtrados:
+        juiz_a = casal["Juiz A"]
+        juiz_b = casal["Juiz B"]
+        casal["Entrância A"] = df.loc[df["Nome"] == juiz_a, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_a, "Entrância"].empty else None
+        casal["Entrância B"] = df.loc[df["Nome"] == juiz_b, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_b, "Entrância"].empty else None
+
+    for triang in triangulos_filtrados:
+        for pos in ["A", "B", "C"]:
+            juiz_nome = triang[f"Juiz {pos}"]
+            triang[f"Entrância {pos}"] = df.loc[df["Nome"] == juiz_nome, "Entrância"].values[0] if not df.loc[df["Nome"] == juiz_nome, "Entrância"].empty else None
 
     if casais_filtrados:
         st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
@@ -132,7 +140,7 @@ with st.expander("📂 Ver base de dados completa"):
     st.dataframe(df)
 
 # ===============================
-# Rodapé com advertências e contato
+# Rodapé
 # ===============================
 st.markdown(
     """
