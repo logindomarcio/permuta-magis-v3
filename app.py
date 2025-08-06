@@ -1,5 +1,6 @@
 import streamlit as st
 import gspread
+import json
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
@@ -19,7 +20,10 @@ LISTA_TJ = sorted([
 # ===============================
 @st.cache_data
 def carregar_dados():
+    # Lê as credenciais direto do secrets.toml
     creds_dict = st.secrets["google_service_account"]
+
+    # Autenticação com gspread
     gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open("Permuta - Magistratura Estadual").sheet1
     data = sheet.get_all_values()
@@ -37,29 +41,21 @@ def carregar_dados():
 # ===============================
 st.markdown(
     """
-    <h1 style='text-align: center; font-family: "Times New Roman", serif; font-size: 42px; color: #2c3e50;'>
-        Permuta - Magistratura Estadual
+    <h1 style='text-align: center; color: #2c3e50; font-family: serif;'>
+    Permuta - Magistratura Estadual
     </h1>
-    <p style='text-align: center; font-family: "Times New Roman", serif; font-size: 16px; color: #555555; max-width: 900px; margin: auto;'>
-        A presente aplicação tem finalidade meramente ilustrativa, gratuita e não oficial, 
-        e não é vinculada a qualquer Tribunal ou instituição associativa. 
-        Os dados abaixo foram voluntariamente preenchidos por interessados. 
-        Eventuais problemas técnicos são naturais. 
-        O objetivo foi gerar visualização gráfica e rápida dos dados.
+    <p style='text-align: center; font-size: 14px; color: gray; font-family: serif;'>
+    A presente aplicação tem finalidade meramente ilustrativa, gratuita e não oficial e nem é vinculada a qualquer Tribunal ou instituição associativa. 
+    Os dados abaixo foram voluntariamente preenchidos por interessados. Eventuais problemas técnicos são naturais. 
+    O objetivo foi gerar visualização gráfica e rápida dos dados.
     </p>
     """,
     unsafe_allow_html=True
 )
 
+# Carregar dados
+df = carregar_dados()
 
-
-# Login simples
-usuarios = {"admin": "1234"}
-usuario = st.text_input("Usuário")
-senha = st.text_input("Senha", type="password")
-if usuarios.get(usuario) != senha:
-    st.warning("Acesso restrito. Digite usuário e senha válidos.")
-    st.stop()
 
 # Botão para atualizar dados
 if st.button("🔄 Atualizar dados da planilha"):
