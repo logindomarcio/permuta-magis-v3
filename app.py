@@ -15,6 +15,10 @@ def carregar_dados():
     data = sheet.get_all_values()
     df = pd.DataFrame(data[1:], columns=data[0])
 
+    # Garantir que a coluna Entrância existe
+    if "Entrância" not in df.columns:
+        df["Entrância"] = None
+
     # Limpar espaços e valores vazios
     for coluna in ["Destino 1", "Destino 2", "Destino 3", "E-mail", "Entrância"]:
         if coluna in df.columns:
