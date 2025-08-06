@@ -10,7 +10,10 @@ from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 # ===============================
 @st.cache_data
 def carregar_dados():
-    creds_dict = json.loads(st.secrets["google_service_account"])
+    # Lê as credenciais direto do secrets.toml
+    creds_dict = st.secrets["google_service_account"]
+
+    # Autenticação com gspread
     gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open("Permuta - Magistratura Estadual").sheet1
     data = sheet.get_all_values()
@@ -22,6 +25,7 @@ def carregar_dados():
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
     return df
+
 
 # ===============================
 # Interface
