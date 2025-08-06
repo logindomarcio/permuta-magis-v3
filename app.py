@@ -37,6 +37,10 @@ def carregar_dados():
 
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
+
+    # Criar coluna auxiliar para buscas
+    df["Nome_Normalizado"] = df["Nome"].apply(normalizar_texto)
+
     return df
 
 # ===============================
@@ -120,21 +124,21 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
 
     # Adicionar entrância aos resultados de casais
     for casal in casais_filtrados:
-        juiz_a = casal["Juiz A"]
-        juiz_b = casal["Juiz B"]
+        juiz_a_norm = normalizar_texto(casal["Juiz A"])
+        juiz_b_norm = normalizar_texto(casal["Juiz B"])
 
-        linha_a = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_a)]
-        linha_b = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_b)]
+        linha_a = df[df["Nome_Normalizado"] == juiz_a_norm]
+        linha_b = df[df["Nome_Normalizado"] == juiz_b_norm]
 
-        casal["Entrância A"] = linha_a["Entrância"].values[0] if not linha_a.empty else None
-        casal["Entrância B"] = linha_b["Entrância"].values[0] if not linha_b.empty else None
+        casal["Entrância A"] = linha_a["Entrância"].iloc[0] if not linha_a.empty else None
+        casal["Entrância B"] = linha_b["Entrância"].iloc[0] if not linha_b.empty else None
 
     # Adicionar entrância aos resultados de triangulações
     for triang in triangulos_filtrados:
         for pos in ["A", "B", "C"]:
-            juiz_nome = triang[f"Juiz {pos}"]
-            linha = df[df["Nome"].apply(normalizar_texto) == normalizar_texto(juiz_nome)]
-            triang[f"Entrância {pos}"] = linha["Entrância"].values[0] if not linha.empty else None
+            juiz_nome_norm = normalizar_texto(triang[f"Juiz {pos}"])
+            linha = df[df["Nome_Normalizado"] == juiz_nome_norm]
+            triang[f"Entrância {pos}"] = linha["Entrância"].iloc[0] if not linha.empty else None
 
     # Exibir resultados
     if casais_filtrados:
