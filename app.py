@@ -3,6 +3,15 @@ import gspread
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
+import unicodedata
+
+def normalizar_texto(texto):
+    if not isinstance(texto, str):
+        return ""
+    texto_norm = unicodedata.normalize('NFKD', texto)
+    texto_sem_acento = ''.join(c for c in texto_norm if not unicodedata.combining(c))
+    return texto_sem_acento.strip().lower()
+
 
 # ===============================
 # Função para carregar dados via st.secrets
@@ -26,6 +35,8 @@ def carregar_dados():
 
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
+    df["Nome_Normalizado"] = df["Nome"].apply(normalizar_texto)
+
 
     return df
 
