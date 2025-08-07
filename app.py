@@ -5,6 +5,9 @@ from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 import unicodedata
 
+# ===============================
+# Funções auxiliares
+# ===============================
 def normalizar_texto(texto):
     if not isinstance(texto, str):
         return ""
@@ -12,6 +15,13 @@ def normalizar_texto(texto):
     texto_sem_acento = ''.join(c for c in texto_norm if not unicodedata.combining(c))
     return texto_sem_acento.strip().lower()
 
+def limpar_celula(x):
+    if not isinstance(x, str):
+        return None
+    x = unicodedata.normalize('NFKD', x)
+    x = ''.join(c for c in x if not unicodedata.combining(c))
+    x = x.replace('\xa0', ' ').strip()
+    return x if x else None
 
 # ===============================
 # Função para carregar dados via st.secrets
@@ -28,15 +38,14 @@ def carregar_dados():
     if "Entrância" not in df.columns:
         df["Entrância"] = None
 
-    # Limpar espaços e valores vazios
+    # Limpeza reforçada de colunas relevantes
     for coluna in ["Destino 1", "Destino 2", "Destino 3", "E-mail", "Entrância"]:
         if coluna in df.columns:
-            df[coluna] = df[coluna].apply(lambda x: x.strip() if x and x.strip() != "" else None)
+            df[coluna] = df[coluna].apply(limpar_celula)
 
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
     df["Nome_Normalizado"] = df["Nome"].apply(normalizar_texto)
-
 
     return df
 
@@ -119,7 +128,6 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
     casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
     triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
 
-    # Exibir resultados diretos (já vêm com Entrância do algoritmo.py)
     if casais_filtrados:
         st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
         st.dataframe(pd.DataFrame(casais_filtrados))
