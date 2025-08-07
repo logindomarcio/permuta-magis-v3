@@ -3,17 +3,6 @@ import gspread
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes
 from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
-import unicodedata
-
-# ===============================
-# Função para normalizar textos (remoção de acentos e caixa baixa)
-# ===============================
-def normalizar_texto(texto):
-    if not isinstance(texto, str):
-        return ""
-    texto_norm = unicodedata.normalize('NFKD', texto)
-    texto_sem_acento = ''.join(c for c in texto_norm if not unicodedata.combining(c))
-    return texto_sem_acento.strip().lower()
 
 # ===============================
 # Função para carregar dados via st.secrets
@@ -37,9 +26,6 @@ def carregar_dados():
 
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
-
-    # Criar coluna auxiliar para buscas
-    df["Nome_Normalizado"] = df["Nome"].apply(normalizar_texto)
 
     return df
 
@@ -122,25 +108,7 @@ if st.button("🔍 Buscar Permutas e Triangulações para meu caso"):
     casais_filtrados = buscar_permutas_diretas(df, origem_user, destino_user)
     triangulos_filtrados = buscar_triangulacoes(df, origem_user, destino_user)
 
-    # Adicionar entrância aos resultados de casais
-    for casal in casais_filtrados:
-        juiz_a_norm = normalizar_texto(casal["Juiz A"])
-        juiz_b_norm = normalizar_texto(casal["Juiz B"])
-
-        linha_a = df[df["Nome_Normalizado"] == juiz_a_norm]
-        linha_b = df[df["Nome_Normalizado"] == juiz_b_norm]
-
-        casal["Entrância A"] = linha_a["Entrância"].iloc[0] if not linha_a.empty else None
-        casal["Entrância B"] = linha_b["Entrância"].iloc[0] if not linha_b.empty else None
-
-    # Adicionar entrância aos resultados de triangulações
-    for triang in triangulos_filtrados:
-        for pos in ["A", "B", "C"]:
-            juiz_nome_norm = normalizar_texto(triang[f"Juiz {pos}"])
-            linha = df[df["Nome_Normalizado"] == juiz_nome_norm]
-            triang[f"Entrância {pos}"] = linha["Entrância"].iloc[0] if not linha.empty else None
-
-    # Exibir resultados
+    # Exibir resultados diretos (já vêm com Entrância do algoritmo.py)
     if casais_filtrados:
         st.success(f"🎯 {len(casais_filtrados)} permuta(s) direta(s) encontrada(s) para seu caso:")
         st.dataframe(pd.DataFrame(casais_filtrados))

@@ -1,8 +1,4 @@
 def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
-    # Garantir que a coluna "Entrância" exista
-    if "Entrância" not in df.columns:
-        df["Entrância"] = None
-
     casais = []
 
     for i, linha_a in df.iterrows():
@@ -13,7 +9,7 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
 
         for j, linha_b in df.iterrows():
             if i == j:
-                continue  # ignora comparação com ele mesmo
+                continue
 
             origem_b = linha_b["Origem"]
             entrancia_b = linha_b["Entrância"] if "Entrância" in linha_b else None
@@ -33,7 +29,7 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
                     "Destino B": origem_a
                 }
 
-                # Filtro se usuário especificou origem/destino
+                # Aplicar filtro se informado
                 if origem_user and destino_user:
                     if not (
                         (origem_a == origem_user and casal["Destino A"] == destino_user) or
@@ -47,10 +43,6 @@ def buscar_permutas_diretas(df, origem_user=None, destino_user=None):
 
 
 def buscar_triangulacoes(df, origem_user=None, destino_user=None):
-    # Garantir que a coluna "Entrância" exista
-    if "Entrância" not in df.columns:
-        df["Entrância"] = None
-
     triangulos = []
 
     for i, linha_a in df.iterrows():
@@ -69,7 +61,7 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
             destinos_b = [d for d in destinos_b if d is not None]
 
             if origem_b not in destinos_a:
-                continue  # A não quer ir para B
+                continue
 
             for k, linha_c in df.iterrows():
                 if k in [i, j]:
@@ -81,9 +73,9 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                 destinos_c = [d for d in destinos_c if d is not None]
 
                 if origem_c not in destinos_b:
-                    continue  # B não quer ir para C
+                    continue
 
-                if origem_a in destinos_c:  # C quer ir para A
+                if origem_a in destinos_c:
                     triangulo = {
                         "Juiz A": linha_a["Nome"],
                         "Entrância A": entrancia_a,
@@ -101,7 +93,7 @@ def buscar_triangulacoes(df, origem_user=None, destino_user=None):
                         "C ➝": origem_a
                     }
 
-                    # Filtro se usuário especificou origem/destino
+                    # Aplicar filtro se informado
                     if origem_user and destino_user:
                         if not (
                             (origem_a == origem_user and triangulo["A ➝"] == destino_user) or
