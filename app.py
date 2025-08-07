@@ -41,7 +41,8 @@ def carregar_dados():
     # Limpeza reforçada de colunas relevantes
     for coluna in ["Destino 1", "Destino 2", "Destino 3", "E-mail", "Entrância"]:
         if coluna in df.columns:
-            df[coluna] = df[coluna].apply(limpar_celula)
+            df[coluna] = df[coluna].apply(lambda x: str(x).strip() if pd.notnull(x) and str(x).strip() != "" else None)
+
 
     df["Nome"] = df["Nome"].str.strip()
     df["Origem"] = df["Origem"].str.strip()
