@@ -2,7 +2,6 @@ import streamlit as st
 import gspread
 import pandas as pd
 from algoritmo import buscar_permutas_diretas, buscar_triangulacoes, buscar_quadrangulacoes
-from mapa import mostrar_mapa_triangulacoes, mostrar_mapa_casais
 import unicodedata
 import plotly.graph_objects as go
 import plotly.express as px
@@ -432,11 +431,6 @@ if st.button("🔍 Buscar Permutas e Combinações"):
             
             df_casais = pd.DataFrame(casais_tabela)
             st.dataframe(df_casais, use_container_width=True, hide_index=True)
-            
-            if 'mostrar_mapa_casais' in globals():
-                st.subheader("🌐 Visualização no Mapa (Casais):")
-                fig_casais = mostrar_mapa_casais(casais_filtrados)
-                st.plotly_chart(fig_casais, use_container_width=True)
         else:
             st.markdown('<div class="info-box">ℹ️ <strong>Permuta Bilateral:</strong> Nenhuma permuta direta encontrada. Isso pode ocorrer quando não há outro juiz que queira ir para sua origem e você também não queira ir para a origem dele.</div>', unsafe_allow_html=True)
     
@@ -483,11 +477,6 @@ if st.button("🔍 Buscar Permutas e Combinações"):
             
             df_triangulos = pd.DataFrame(triangulos_tabela)
             st.dataframe(df_triangulos, use_container_width=True, hide_index=True)
-            
-            if 'mostrar_mapa_triangulacoes' in globals():
-                st.subheader("🌐 Visualização no Mapa (Triangulações):")
-                fig_triang = mostrar_mapa_triangulacoes(triangulos_filtrados)
-                st.plotly_chart(fig_triang, use_container_width=True)
         else:
             st.markdown('<div class="info-box">ℹ️ <strong>Triangulação:</strong> Nenhuma triangulação encontrada. Para haver triangulação, é necessário que existam três juízes onde A quer ir para onde B está, B quer ir para onde C está, e C quer ir para onde A está.</div>', unsafe_allow_html=True)
     
