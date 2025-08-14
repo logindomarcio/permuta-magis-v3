@@ -17,6 +17,11 @@ def buscar_permutas_diretas(df, origem_user, destinos_user_list):
     origem_user_norm = normalizar_texto(origem_user)
     destinos_user_norm = [normalizar_texto(d) for d in destinos_user_list if pd.notna(d)]
 
+    # Obter dados do usuário
+    usuario_row = df[df["Origem"] == origem_user].iloc[0] if len(df[df["Origem"] == origem_user]) > 0 else None
+    if usuario_row is None:
+        return casais
+
     for i, linha_a in df.iterrows():
         # Pular se é o próprio usuário
         if linha_a["Origem"] == origem_user:
@@ -35,8 +40,8 @@ def buscar_permutas_diretas(df, origem_user, destinos_user_list):
         # E se linha_a quer ir para onde o usuário está
         if origem_a in destinos_user_norm and origem_user_norm in destinos_a:
             casal = {
-                "Juiz A": origem_user,  # O usuário
-                "Entrância A": df[df["Origem"] == origem_user].iloc[0].get("Entrância") if len(df[df["Origem"] == origem_user]) > 0 else "",
+                "Juiz A": usuario_row.get("Nome"),  # Nome do usuário
+                "Entrância A": usuario_row.get("Entrância"),
                 "Origem A": origem_user,
                 "Destino A": linha_a.get("Origem"),
 
@@ -57,6 +62,11 @@ def buscar_triangulacoes(df, origem_user, destinos_user_list):
     triangulos = []
     origem_user_norm = normalizar_texto(origem_user)
     destinos_user_norm = [normalizar_texto(d) for d in destinos_user_list if pd.notna(d)]
+
+    # Obter dados do usuário
+    usuario_row = df[df["Origem"] == origem_user].iloc[0] if len(df[df["Origem"] == origem_user]) > 0 else None
+    if usuario_row is None:
+        return triangulos
 
     for i, linha_a in df.iterrows():
         # Pular se é o próprio usuário
@@ -96,8 +106,8 @@ def buscar_triangulacoes(df, origem_user, destinos_user_list):
             # Verificar se B quer ir para onde o usuário está
             if origem_user_norm in destinos_b:
                 triangulo = {
-                    "Juiz A": origem_user,  # Usuário
-                    "Entrância A": df[df["Origem"] == origem_user].iloc[0].get("Entrância") if len(df[df["Origem"] == origem_user]) > 0 else "",
+                    "Juiz A": usuario_row.get("Nome"),  # Nome do usuário
+                    "Entrância A": usuario_row.get("Entrância"),
                     "Origem A": origem_user,
                     "A ➝": linha_a.get("Origem"),
 
@@ -123,6 +133,19 @@ def buscar_quadrangulacoes(df, origem_user, destinos_user_list):
     quadrangulos = []
     origem_user_norm = normalizar_texto(origem_user)
     destinos_user_norm = [normalizar_texto(d) for d in destinos_user_list if pd.notna(d)]
+
+def buscar_quadrangulacoes(df, origem_user, destinos_user_list):
+    """
+    Busca quadrangulações envolvendo o usuário
+    """
+    quadrangulos = []
+    origem_user_norm = normalizar_texto(origem_user)
+    destinos_user_norm = [normalizar_texto(d) for d in destinos_user_list if pd.notna(d)]
+
+    # Obter dados do usuário
+    usuario_row = df[df["Origem"] == origem_user].iloc[0] if len(df[df["Origem"] == origem_user]) > 0 else None
+    if usuario_row is None:
+        return quadrangulos
 
     for i, linha_a in df.iterrows():
         # Pular se é o próprio usuário
@@ -179,8 +202,8 @@ def buscar_quadrangulacoes(df, origem_user, destinos_user_list):
                 # Verificar se C quer ir para onde o usuário está
                 if origem_user_norm in destinos_c:
                     quadrangulo = {
-                        "Juiz A": origem_user,  # Usuário
-                        "Entrância A": df[df["Origem"] == origem_user].iloc[0].get("Entrância") if len(df[df["Origem"] == origem_user]) > 0 else "",
+                        "Juiz A": usuario_row.get("Nome"),  # Nome do usuário
+                        "Entrância A": usuario_row.get("Entrância"),
                         "Origem A": origem_user,
                         "A ➝": linha_a.get("Origem"),
 

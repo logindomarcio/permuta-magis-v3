@@ -98,15 +98,22 @@ def obter_prioridade_destino(origem_juiz, destino_final, df):
     """Retorna a prioridade do destino (1, 2 ou 3) para um juiz"""
     juiz_row = df[df["Origem"] == origem_juiz].iloc[0] if len(df[df["Origem"] == origem_juiz]) > 0 else None
     if juiz_row is None:
-        return ""
+        return "", ""
     
     if juiz_row["Destino 1"] == destino_final:
-        return "¹"
+        return "¹", "🔵"  # Azul para prioridade 1
     elif juiz_row["Destino 2"] == destino_final:
-        return "²"  
+        return "²", "🟢"  # Verde para prioridade 2
     elif juiz_row["Destino 3"] == destino_final:
-        return "³"
-    return ""
+        return "³", "🔴"  # Vermelho para prioridade 3
+    return "", ""
+
+def obter_nome_juiz_por_origem(origem, df):
+    """Retorna o nome do juiz baseado na origem"""
+    juiz_row = df[df["Origem"] == origem]
+    if len(juiz_row) > 0:
+        return juiz_row.iloc[0]["Nome"]
+    return origem  # Fallback para a origem se não encontrar o nome
 
 # ===============================
 # CSS personalizado para melhor estética
@@ -397,12 +404,34 @@ if st.button("🔍 Buscar Permutas e Combinações"):
             st.markdown(f"🎯 **{len(casais_filtrados)} permuta(s) direta(s) encontrada(s):**")
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Adicionar indicadores de prioridade
-            for casal in casais_filtrados:
-                casal["Prioridade A"] = obter_prioridade_destino(casal["Origem A"], casal["Destino A"], df)
-                casal["Prioridade B"] = obter_prioridade_destino(casal["Origem B"], casal["Destino B"], df)
+            # Legenda de cores
+            st.markdown("""
+            **Legenda de Prioridades:**
+            🔵 **Destino 1** - Prioritário | 🟢 **Destino 2** - Secundário | 🔴 **Destino 3** - Terciário
+            """)
             
-            st.dataframe(pd.DataFrame(casais_filtrados), use_container_width=True)
+            # Criar tabela simplificada para casais
+            casais_tabela = []
+            for casal in casais_filtrados:
+                # Obter nomes e prioridades
+                nome_usuario = nome_selecionado
+                nome_parceiro = obter_nome_juiz_por_origem(casal["Origem B"], df)
+                
+                prioridade_usuario, cor_usuario = obter_prioridade_destino(origem_user, casal["Destino A"], df)
+                prioridade_parceiro, cor_parceiro = obter_prioridade_destino(casal["Origem B"], casal["Destino B"], df)
+                
+                casais_tabela.append({
+                    "👤 Seu Nome": nome_usuario,
+                    "📍 Sua Origem": origem_user,
+                    "🎯 Você vai para": f"{casal['Destino A']}{prioridade_usuario}",
+                    "🤝 Parceiro": nome_parceiro,
+                    "📍 Origem do Parceiro": casal["Origem B"],
+                    "🎯 Parceiro vai para": f"{casal['Destino B']}{prioridade_parceiro}",
+                    "💡 Combinação": f"{nome_usuario} ↔ {nome_parceiro}"
+                })
+            
+            df_casais = pd.DataFrame(casais_tabela)
+            st.dataframe(df_casais, use_container_width=True, hide_index=True)
             
             if 'mostrar_mapa_casais' in globals():
                 st.subheader("🌐 Visualização no Mapa (Casais):")
@@ -421,13 +450,39 @@ if st.button("🔍 Buscar Permutas e Combinações"):
             st.markdown(f"🔺 **{len(triangulos_filtrados)} triangulação(ões) encontrada(s):**")
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Adicionar indicadores de prioridade
-            for triangulo in triangulos_filtrados:
-                triangulo["Prioridade A"] = obter_prioridade_destino(triangulo["Origem A"], triangulo["A ➝"], df)
-                triangulo["Prioridade B"] = obter_prioridade_destino(triangulo["Origem B"], triangulo["B ➝"], df)
-                triangulo["Prioridade C"] = obter_prioridade_destino(triangulo["Origem C"], triangulo["C ➝"], df)
+            # Legenda de cores para triangulações
+            st.markdown("""
+            **Legenda de Prioridades:**
+            🔵 **Destino 1** - Prioritário | 🟢 **Destino 2** - Secundário | 🔴 **Destino 3** - Terciário
+            """)
             
-            st.dataframe(pd.DataFrame(triangulos_filtrados), use_container_width=True)
+            # Criar tabela simplificada para triangulações
+            triangulos_tabela = []
+            for i, triangulo in enumerate(triangulos_filtrados, 1):
+                # Obter nomes
+                nome_a = nome_selecionado if triangulo["Origem A"] == origem_user else obter_nome_juiz_por_origem(triangulo["Origem A"], df)
+                nome_b = obter_nome_juiz_por_origem(triangulo["Origem B"], df)
+                nome_c = obter_nome_juiz_por_origem(triangulo["Origem C"], df)
+                
+                # Obter prioridades
+                prioridade_a, _ = obter_prioridade_destino(triangulo["Origem A"], triangulo["A ➝"], df)
+                prioridade_b, _ = obter_prioridade_destino(triangulo["Origem B"], triangulo["B ➝"], df)
+                prioridade_c, _ = obter_prioridade_destino(triangulo["Origem C"], triangulo["C ➝"], df)
+                
+                # Criar explicação da combinação
+                combinacao = f"🔄 {nome_a} → {triangulo['A ➝']}{prioridade_a} → {nome_b} → {triangulo['B ➝']}{prioridade_b} → {nome_c} → {triangulo['C ➝']}{prioridade_c} → {nome_a}"
+                
+                triangulos_tabela.append({
+                    "🔢": f"#{i}",
+                    "👤 Participante A": f"{nome_a} ({triangulo['Origem A']})",
+                    "👤 Participante B": f"{nome_b} ({triangulo['Origem B']})",
+                    "👤 Participante C": f"{nome_c} ({triangulo['Origem C']})",
+                    "🔄 Fluxo da Triangulação": combinacao,
+                    "📋 Resumo": f"A→{triangulo['A ➝']}{prioridade_a}, B→{triangulo['B ➝']}{prioridade_b}, C→{triangulo['C ➝']}{prioridade_c}"
+                })
+            
+            df_triangulos = pd.DataFrame(triangulos_tabela)
+            st.dataframe(df_triangulos, use_container_width=True, hide_index=True)
             
             if 'mostrar_mapa_triangulacoes' in globals():
                 st.subheader("🌐 Visualização no Mapa (Triangulações):")
@@ -446,14 +501,42 @@ if st.button("🔍 Buscar Permutas e Combinações"):
             st.markdown(f"🔷 **{len(quadrangulos_filtrados)} quadrangulação(ões) encontrada(s):**")
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # Adicionar indicadores de prioridade
-            for quadrangulo in quadrangulos_filtrados:
-                quadrangulo["Prioridade A"] = obter_prioridade_destino(quadrangulo["Origem A"], quadrangulo["A ➝"], df)
-                quadrangulo["Prioridade B"] = obter_prioridade_destino(quadrangulo["Origem B"], quadrangulo["B ➝"], df)
-                quadrangulo["Prioridade C"] = obter_prioridade_destino(quadrangulo["Origem C"], quadrangulo["C ➝"], df)
-                quadrangulo["Prioridade D"] = obter_prioridade_destino(quadrangulo["Origem D"], quadrangulo["D ➝"], df)
+            # Legenda de cores para quadrangulações
+            st.markdown("""
+            **Legenda de Prioridades:**
+            🔵 **Destino 1** - Prioritário | 🟢 **Destino 2** - Secundário | 🔴 **Destino 3** - Terciário
+            """)
             
-            st.dataframe(pd.DataFrame(quadrangulos_filtrados), use_container_width=True)
+            # Criar tabela simplificada para quadrangulações
+            quadrangulos_tabela = []
+            for i, quad in enumerate(quadrangulos_filtrados, 1):
+                # Obter nomes
+                nome_a = nome_selecionado if quad["Origem A"] == origem_user else obter_nome_juiz_por_origem(quad["Origem A"], df)
+                nome_b = obter_nome_juiz_por_origem(quad["Origem B"], df)
+                nome_c = obter_nome_juiz_por_origem(quad["Origem C"], df)
+                nome_d = obter_nome_juiz_por_origem(quad["Origem D"], df)
+                
+                # Obter prioridades
+                prioridade_a, _ = obter_prioridade_destino(quad["Origem A"], quad["A ➝"], df)
+                prioridade_b, _ = obter_prioridade_destino(quad["Origem B"], quad["B ➝"], df)
+                prioridade_c, _ = obter_prioridade_destino(quad["Origem C"], quad["C ➝"], df)
+                prioridade_d, _ = obter_prioridade_destino(quad["Origem D"], quad["D ➝"], df)
+                
+                # Criar explicação da combinação
+                combinacao = f"🔄 {nome_a} → {quad['A ➝']}{prioridade_a} → {nome_b} → {quad['B ➝']}{prioridade_b} → {nome_c} → {quad['C ➝']}{prioridade_c} → {nome_d} → {quad['D ➝']}{prioridade_d} → {nome_a}"
+                
+                quadrangulos_tabela.append({
+                    "🔢": f"#{i}",
+                    "👤 Participante A": f"{nome_a} ({quad['Origem A']})",
+                    "👤 Participante B": f"{nome_b} ({quad['Origem B']})",
+                    "👤 Participante C": f"{nome_c} ({quad['Origem C']})",
+                    "👤 Participante D": f"{nome_d} ({quad['Origem D']})",
+                    "🔄 Fluxo da Quadrangulação": combinacao,
+                    "📋 Resumo": f"A→{quad['A ➝']}{prioridade_a}, B→{quad['B ➝']}{prioridade_b}, C→{quad['C ➝']}{prioridade_c}, D→{quad['D ➝']}{prioridade_d}"
+                })
+            
+            df_quadrangulos = pd.DataFrame(quadrangulos_tabela)
+            st.dataframe(df_quadrangulos, use_container_width=True, hide_index=True)
         else:
             st.markdown('<div class="info-box">ℹ️ <strong>Quadrangulação:</strong> Nenhuma quadrangulação encontrada. Para haver quadrangulação, é necessário que existam quatro juízes onde A quer ir para onde B está, B quer ir para onde C está, C quer ir para onde D está, e D quer ir para onde A está.</div>', unsafe_allow_html=True)
     
