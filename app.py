@@ -1,11 +1,17 @@
 import streamlit as st
 import gspread
 import pandas as pd
-from algoritmo import buscar_permutas_diretas, buscar_triangulacoes, buscar_quadrangulacoes
 import unicodedata
 import plotly.graph_objects as go
 import plotly.express as px
 from collections import Counter
+
+# Importar funções do algoritmo com tratamento de erro
+try:
+    from algoritmo import buscar_permutas_diretas, buscar_triangulacoes, buscar_quadrangulacoes
+except ImportError:
+    st.error("Erro na importação do módulo algoritmo. Verifique se o arquivo algoritmo.py está presente.")
+    st.stop()
 
 # ===============================
 # Configuração da página
