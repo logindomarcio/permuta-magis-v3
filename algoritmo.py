@@ -28,16 +28,11 @@ def buscar_permutas_diretas(df, origem_user, destinos_user_list):
             if pd.notna(destino) and str(destino).strip():
                 destinos_limpos.append(str(destino).strip())
         
-        print(f"[DEBUG] Usuário: {usuario_nome} ({origem_user})")
-        print(f"[DEBUG] Destinos do usuário: {destinos_limpos}")
-        
         # Para cada destino que o usuário quer
         for destino_desejado in destinos_limpos:
-            print(f"[DEBUG] Buscando parceiros em: {destino_desejado}")
             
             # Buscar juízes no destino desejado
             juizes_no_destino = df[df["Origem"] == destino_desejado]
-            print(f"[DEBUG] Encontrados {len(juizes_no_destino)} juízes em {destino_desejado}")
             
             for _, juiz_row in juizes_no_destino.iterrows():
                 juiz_nome = str(juiz_row.get("Nome", "")).strip()
@@ -50,15 +45,8 @@ def buscar_permutas_diretas(df, origem_user, destinos_user_list):
                     if pd.notna(destino_val) and str(destino_val).strip():
                         destinos_do_juiz.append(str(destino_val).strip())
                 
-                print(f"[DEBUG] Analisando: {juiz_nome}")
-                print(f"[DEBUG]   Origem: {juiz_origem}")
-                print(f"[DEBUG]   Destinos: {destinos_do_juiz}")
-                print(f"[DEBUG]   Quer ir para {origem_user}? {origem_user in destinos_do_juiz}")
-                
                 # VERIFICAÇÃO CRÍTICA: Este juiz quer ir para onde o usuário está?
                 if origem_user in destinos_do_juiz:
-                    print(f"[DEBUG] ✅ CASAL VÁLIDO: {usuario_nome} ↔ {juiz_nome}")
-                    
                     casal = {
                         "Juiz A": usuario_nome,
                         "Entrância A": str(usuario_row.get("Entrância", "")).strip(),
@@ -70,14 +58,11 @@ def buscar_permutas_diretas(df, origem_user, destinos_user_list):
                         "Destino B": origem_user
                     }
                     casais.append(casal)
-                else:
-                    print(f"[DEBUG] ❌ Não forma casal: {juiz_nome} não quer ir para {origem_user}")
     
     except Exception as e:
         print(f"Erro em buscar_permutas_diretas: {e}")
         return []
     
-    print(f"[DEBUG] Total de casais encontrados: {len(casais)}")
     return casais
 
 
