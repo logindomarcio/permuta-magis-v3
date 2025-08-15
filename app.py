@@ -6,11 +6,22 @@ import plotly.graph_objects as go
 import plotly.express as px
 from collections import Counter
 
-# Importar funções do algoritmo com tratamento de erro
+# Importar funções do algoritmo com tratamento de erro robusto
 try:
     from algoritmo import buscar_permutas_diretas, buscar_triangulacoes, buscar_quadrangulacoes
-except ImportError:
-    st.error("Erro na importação do módulo algoritmo. Verifique se o arquivo algoritmo.py está presente.")
+    ALGORITMO_DISPONIVEL = True
+except ImportError as e:
+    st.error(f"Erro na importação do módulo algoritmo: {e}")
+    ALGORITMO_DISPONIVEL = False
+except SyntaxError as e:
+    st.error(f"Erro de sintaxe no arquivo algoritmo.py: {e}")
+    ALGORITMO_DISPONIVEL = False
+except Exception as e:
+    st.error(f"Erro inesperado ao importar algoritmo: {e}")
+    ALGORITMO_DISPONIVEL = False
+
+# Se não conseguir importar, parar execução
+if not ALGORITMO_DISPONIVEL:
     st.stop()
 
 # ===============================
